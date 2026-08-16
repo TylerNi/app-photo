@@ -130,7 +130,7 @@ app-photo/
 ├── Dockerfile                    T8
 ├── docker-compose.yml            T8   ← à coller dans l'éditeur web de Portainer
 ├── .dockerignore                 T8
-├── .gitignore                    T8
+├── .gitignore                    T1   ← tout premier fichier écrit du projet
 ├── .env.example                  T8
 ├── .github/workflows/build.yml   T8
 └── README.md                     T8
@@ -404,7 +404,12 @@ deux fois le même `kind` pour le même destinataire et la même `local_day` (v�
 - TypeScript en `strict`. Pas de `any` non justifié.
 - Git : commit autorisé à la fin de sa tâche, **uniquement sur les fichiers dont on est propriétaire**,
   message en français préfixé par le code de la tâche (`T3 : calcul du streak et route /api/snap`).
-  **Jamais de `push`.** Jamais de réécriture d'historique.
+  Le `package-lock.json` de son projet npm fait partie des fichiers à committer. **Jamais de `push`.**
+  Jamais de réécriture d'historique.
+- **Tâches menées en parallèle** : les périmètres de fichiers sont disjoints, donc les éditions ne se
+  marchent pas dessus, mais deux `git commit` simultanés dans le même dossier de travail entrent en
+  collision sur `index.lock`. Fais tourner les tâches parallèles dans des **worktrees git séparés**,
+  ou fais-les committer l'une après l'autre.
 
 ## 11. Découpage en tâches
 
@@ -452,3 +457,35 @@ prétexte pour changer une décision du §2 : en cas de blocage réel, on prévi
    disposer des outils de compilation, l'étape finale non.
 6. **Taille des requêtes** : le tunnel qui expose l'app peut imposer une limite par requête. On
    envoie donc **un fichier par requête HTTP** côté frontend, même pour une sélection multiple.
+
+## 13. Recette finale
+
+Chaque tâche vérifie sa propre part, mais **personne ne vérifie l'assemblage** : c'est le rôle de
+cette recette, à dérouler une fois les huit tâches livrées, sur un vrai iPhone, avec l'app installée
+sur l'écran d'accueil et le tunnel HTTPS de Tyler en place. C'est aussi ici qu'atterrissent tous les
+points que les fiches laissent « à confirmer sur l'appareil ».
+
+1. Ouvrir l'URL dans Safari → écran de mot de passe. Mauvais mot de passe refusé, bon mot de passe
+   accepté.
+2. Choix du profil façon Netflix → arrivée sur l'écran Snap.
+3. Partager › Sur l'écran d'accueil, puis ouvrir depuis l'icône : plein écran, toujours connecté,
+   toujours sur le bon profil, en-tête sous l'encoche.
+4. Activer les notifications depuis le bouton, puis `POST /api/push/test` : la notification arrive
+   **app fermée**.
+5. Camille envoie un snap → Tyler reçoit `📸 Camille t'a envoyé un Snap !`, et un clic ouvre l'app
+   sur l'écran Snap.
+6. Chez Tyler, la photo de Camille est **floue et illisible**, et l'onglet réseau ne montre aucune
+   requête vers `/original` ni `/thumb` de ce média.
+7. Tyler envoie sa photo → révélation immédiate en pleine qualité, `🔥 1`, `Journée complète ✅`.
+8. Album : le snap du jour y apparaît, la grille ne charge que des vignettes, le défilement infini
+   fonctionne.
+9. Ajouter 5 photos depuis la pellicule → **une seule** notification chez l'autre, « vient d'ajouter
+   5 photos ».
+10. Appui long sur une photo → menu maison → `Partager` → « Enregistrer l'image » : le fichier
+    déposé dans la pellicule a **la même taille que l'original**, pas celle de la vignette.
+    Puis `Copier` et coller dans iMessage.
+11. Envoyer une vidéo, la relire dans la visionneuse sans plein écran forcé.
+12. Régler `REMINDER_1` deux minutes dans le futur, redéployer : seul celui qui n'a pas envoyé son
+    snap reçoit le rappel, et un redémarrage du conteneur ne le renvoie pas.
+13. Portainer : *Re-pull image* puis *Redeploy* → l'app revient avec sa base, ses photos et sa
+    session intactes, sans aucune étape manuelle.

@@ -14,7 +14,9 @@ routeurs des autres tâches et tu les câbles, pour que personne d'autre n'ait j
 ## Fichiers que tu possèdes
 
 ```
+.gitignore                   ← à écrire en tout premier, avant le moindre npm install
 server/package.json
+server/package-lock.json
 server/tsconfig.json
 server/src/index.ts
 server/src/config.ts
@@ -39,6 +41,13 @@ Tu ne crées **pas** le dossier `server/src/media/` ni `server/src/streak.ts`. D
 
 ## Travail détaillé
 
+### 0. `.gitignore`, avant tout le reste
+
+Ta toute première action, avant `npm install` : écrire `.gitignore` à la racine du dépôt avec
+`node_modules/`, `dist/`, `.data/` et `.env`. Tu es la première tâche à créer un `node_modules`, et
+T5 en créera un second dans `web/` — sans ce fichier écrit d'abord, ils finissent dans le dépôt.
+N'y mets **rien** concernant `.claude/` : c'est déjà couvert par le gitignore global de Tyler.
+
 ### 1. `server/package.json`
 
 Tu es le **seul propriétaire des dépendances du backend**. Les autres tâches ne font jamais
@@ -58,6 +67,9 @@ Configuration : `"type": "module"`, `"engines": { "node": ">=24" }`, et les scri
 
 `tsconfig.json` : `strict`, `target` ES2023, `module`/`moduleResolution` `NodeNext`, `rootDir: src`,
 `outDir: dist`.
+
+**Commit obligatoirement `server/package-lock.json`.** L'image Docker de T8 se construit avec
+`npm ci`, qui échoue sans lockfile : sans lui, la première construction est cassée.
 
 ### 2. `server/src/config.ts`
 

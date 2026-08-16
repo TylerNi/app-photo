@@ -15,6 +15,7 @@ ensuite à modifier `App.tsx`.
 
 ```
 web/package.json
+web/package-lock.json
 web/tsconfig.json
 web/vite.config.ts
 web/index.html
@@ -55,6 +56,9 @@ seul propriétaire de ces dépendances ; T4, T6 et T7 n'installent rien.
 cross-origin.
 
 `tsconfig.json` en `strict`, JSX `react-jsx`.
+
+**Commit obligatoirement `web/package-lock.json`.** L'image Docker de T8 se construit avec `npm ci`,
+qui échoue sans lockfile.
 
 ### 2. `web/index.html`
 
@@ -169,7 +173,10 @@ utiliseront, donc donne-leur des props simples et stables (`variant: 'primary' |
 CSS écrit à la main, un seul fichier, variables CSS en tête.
 
 - **Thème sombre**, adapté à une app de photos : les images doivent être ce qui attire l'œil.
-- Deux couleurs de profil, une par personne, réutilisées pour les tuiles et la pastille.
+- Deux couleurs de profil, une par personne, réutilisées pour les tuiles de `ProfilePick` et pour la
+  pastille d'`AppShell`. **L'association se fait par l'index dans `profiles`** : le premier nom reçoit
+  la première couleur, le second la seconde. Jamais par comparaison avec un prénom en dur — T7 se
+  sert aussi de ces couleurs, et les deux écrans doivent donner exactement le même résultat.
 - `height: 100dvh` et non `100vh` : sur iOS, `100vh` déborde sous la barre d'adresse.
 - `overscroll-behavior: none` sur le corps, pour supprimer le rebond élastique qui trahit une
   page web dans une app installée.

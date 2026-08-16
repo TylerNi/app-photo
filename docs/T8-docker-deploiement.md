@@ -16,7 +16,6 @@ Objectif de mise à jour, tel que demandé : **repull image, redeploy stack, rie
 ```
 Dockerfile
 .dockerignore
-.gitignore
 docker-compose.yml
 .env.example
 .github/workflows/build.yml
@@ -77,13 +76,12 @@ est possible si Tyler préfère, à condition d'ajuster les droits du dataset.
 Ne définis **pas** la variable `TZ` du conteneur : la seule chose qui compte est `APP_TZ`, lue par le
 code, et deux réglages de fuseau qui se ressemblent finiraient par diverger.
 
-### 2. `.dockerignore` et `.gitignore`
+### 2. `.dockerignore`
 
-`.dockerignore` : `node_modules`, `dist`, `.git`, `.github`, `docs`, `.data`, `*.md`, `.env`.
-Le contexte de construction doit rester petit.
+`node_modules`, `dist`, `.git`, `.github`, `docs`, `.data`, `*.md`, `.env`. Le contexte de
+construction doit rester petit.
 
-`.gitignore` : `node_modules/`, `dist/`, `.data/`, `.env`. **N'ajoute rien concernant `.claude/`** :
-c'est déjà couvert par le gitignore global de Tyler.
+Le `.gitignore` appartient à **T1**, qui l'écrit avant son premier `npm install` : n'y touche pas.
 
 ### 3. `docker-compose.yml` — destiné à l'éditeur web de Portainer
 
@@ -187,6 +185,9 @@ Pas de section « architecture », pas de diagramme, pas de feuille de route, pa
    données survivent** à `docker rm` puis `docker run` de la même image.
 7. Le conteneur remplacé par une image reconstruite retrouve sa base sans perte et sans étape
    manuelle (c'est le scénario « repull + redeploy »).
+7 bis. Dans l'image construite, l'app **fonctionne vraiment** : mot de passe, choix de profil, envoi
+   d'un snap, album. C'est le seul moment où le frontend compilé et le backend tournent ensemble
+   comme en production — la recette complète est au §13 du plan général.
 8. Le workflow GitHub Actions passe au vert et publie `ghcr.io/tylerni/app-photo:latest`.
 9. `docker pull ghcr.io/tylerni/app-photo:latest` fonctionne depuis une autre machine une fois le
    paquet rendu public.
