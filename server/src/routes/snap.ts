@@ -70,9 +70,9 @@ router.post(
       return;
     }
 
+    let media;
     try {
-      const media = await storeUpload(req.file, profile, 'snap');
-      onSnapSent(profile, media).catch(() => {});
+      media = await storeUpload(req.file, profile, 'snap');
     } catch (err) {
       if (err instanceof UnsupportedTypeError) {
         res.status(415).json({ error: 'unsupported_type', message: 'Type de fichier refusé.' });
@@ -82,6 +82,7 @@ router.post(
     }
 
     res.json(todayState(profile));
+    onSnapSent(profile, media).catch(() => {});
   },
 );
 
