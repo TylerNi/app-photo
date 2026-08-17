@@ -68,6 +68,12 @@ export function Snap() {
     return () => document.removeEventListener('visibilitychange', onVisibility);
   }, [load]);
 
+  useEffect(() => {
+    for (const media of state?.other.media ?? []) {
+      if (media.kind === 'photo') new Image().src = media.originalUrl;
+    }
+  }, [state]);
+
   async function send(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     event.target.value = '';
