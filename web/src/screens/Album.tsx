@@ -36,12 +36,17 @@ function dayLabel(day: string): string {
   });
 }
 
+function sortKey(media: Media): string {
+  return media.takenAt ?? media.createdAt;
+}
+
 function groupByDay(items: Media[]): { day: string; items: Media[] }[] {
   const groups: { day: string; items: Media[] }[] = [];
   for (const media of items) {
+    const day = isoDay(new Date(sortKey(media)));
     const last = groups[groups.length - 1];
-    if (last && last.day === media.localDay) last.items.push(media);
-    else groups.push({ day: media.localDay, items: [media] });
+    if (last && last.day === day) last.items.push(media);
+    else groups.push({ day, items: [media] });
   }
   return groups;
 }
@@ -204,7 +209,11 @@ export function Album() {
         const media = await uploadToAlbum(file, (pct) =>
           setUpload({ index: index + 1, total: files.length, pct }),
         );
-        setItems((previous) => [media, ...previous.filter((other) => other.id !== media.id)]);
+        setItems((previous) =>
+          [media, ...previous.filter((other) => other.id !== media.id)].sort(
+            (a, b) => sortKey(b).localeCompare(sortKey(a)) || b.id.localeCompare(a.id),
+          ),
+        );
       } catch (err) {
         failed.push(`${file.name} — ${err instanceof ApiError ? err.message : 'envoi impossible'}`);
       }

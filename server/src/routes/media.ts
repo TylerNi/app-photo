@@ -18,18 +18,20 @@ const hasSnapStmt = db.prepare(
   "SELECT 1 FROM media WHERE source = 'snap' AND owner = ? AND local_day = ? LIMIT 1",
 );
 
+type AlbumRow = MediaRow & { sort_at: string };
+
 const listFirstPage = db.prepare(`
-  SELECT * FROM media
+  SELECT *, COALESCE(taken_at, created_at) AS sort_at FROM media
   WHERE NOT (source = 'snap' AND owner <> @me AND local_day = @today AND @hasSnap = 0)
-  ORDER BY created_at DESC, id DESC
+  ORDER BY sort_at DESC, id DESC
   LIMIT @limit
 `);
 
 const listAfterCursor = db.prepare(`
-  SELECT * FROM media
+  SELECT *, COALESCE(taken_at, created_at) AS sort_at FROM media
   WHERE NOT (source = 'snap' AND owner <> @me AND local_day = @today AND @hasSnap = 0)
-    AND (created_at, id) < (@createdAt, @id)
-  ORDER BY created_at DESC, id DESC
+    AND (COALESCE(taken_at, created_at), id) < (@sortAt, @id)
+  ORDER BY sort_at DESC, id DESC
   LIMIT @limit
 `);
 
@@ -130,7 +132,7 @@ router.get('/album', requireProfile, (req, res) => {
   };
 
   const before = typeof req.query.before === 'string' ? req.query.before : null;
-  let rows: MediaRow[];
+  let rows: AlbumRow[];
 
   if (before) {
     const separator = before.indexOf('|');
@@ -140,16 +142,16 @@ router.get('/album', requireProfile, (req, res) => {
     }
     rows = listAfterCursor.all({
       ...params,
-      createdAt: before.slice(0, separator),
+      sortAt: before.slice(0, separator),
       id: before.slice(separator + 1),
-    }) as MediaRow[];
+    }) as AlbumRow[];
   } else {
-    rows = listFirstPage.all(params) as MediaRow[];
+    rows = listFirstPage.all(params) as AlbumRow[];
   }
 
   const page = rows.slice(0, limit);
   const last = page[page.length - 1];
-  const nextCursor = rows.length > limit && last ? `${last.created_at}|${last.id}` : null;
+  const nextCursor = rows.length > limit && last ? `${last.sort_at}|${last.id}` : null;
 
   res.json({ items: page.map(toMedia), nextCursor });
 });

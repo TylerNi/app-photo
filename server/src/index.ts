@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { requireAuth } from './auth.js';
 import { config } from './config.js';
 import './db.js';
+import { reprobeTakenAt } from './media/reprobe.js';
 import { router as authRouter } from './routes/auth.js';
 import { router as mediaRouter } from './routes/media.js';
 import { router as pushRouter } from './routes/push.js';
@@ -42,4 +43,5 @@ app.use((_err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 
 app.listen(config.port, '0.0.0.0', () => {
   console.log(`app-photo écoute sur le port ${config.port}`);
+  reprobeTakenAt().catch(() => {});
 });

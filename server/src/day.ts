@@ -37,6 +37,20 @@ export function localDay(date: Date = new Date()): string {
   return dayFormat.format(date);
 }
 
+export function localToUtc(
+  year: number,
+  month: number,
+  day: number,
+  hour: number,
+  minute: number,
+  second: number,
+): string {
+  const asUtc = Date.UTC(year, month - 1, day, hour, minute, second);
+  let instant = asUtc - offsetMs(asUtc);
+  instant = asUtc - offsetMs(instant);
+  return new Date(instant).toISOString();
+}
+
 export function nextMidnightUtc(date: Date = new Date()): string {
   const [year, month, day] = localDay(date).split('-').map(Number);
   const localMidnight = Date.UTC(year, month - 1, day + 1);

@@ -1,5 +1,6 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { localToUtc } from '../day.js';
 
 const run = promisify(execFile);
 const TIMEOUT = 30_000;
@@ -10,7 +11,14 @@ function fromExifDate(raw: string): string | null {
   const match = EXIF_DATE.exec(raw.trim());
   if (!match) return null;
   const [, year, month, day, hour, minute, second] = match;
-  return `${year}-${month}-${day}T${hour}:${minute}:${second}.000Z`;
+  return localToUtc(
+    Number(year),
+    Number(month),
+    Number(day),
+    Number(hour),
+    Number(minute),
+    Number(second),
+  );
 }
 
 export async function probeImage(
