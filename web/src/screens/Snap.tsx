@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ChangeEvent, CSSProperties, MouseEvent } from 'react';
+import type { ChangeEvent, CSSProperties, MouseEvent, TouchEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiError } from '../api/client';
 import { getToday, sendSnap } from '../api/snap';
@@ -8,6 +8,8 @@ import { useSession } from '../session';
 import { Button } from '../ui/Button';
 import { Spinner } from '../ui/Spinner';
 import './Snap.css';
+
+const SWIPE = 50;
 
 function seenKey(profile: string): string {
   return `snap-seen-${profile}`;
@@ -43,6 +45,8 @@ export function Snap() {
   const [reveal, setReveal] = useState<{ items: Media[]; index: number } | null>(null);
   const sending = useRef(false);
   const cameraInput = useRef<HTMLInputElement>(null);
+  const start = useRef<{ x: number; y: number } | null>(null);
+  const swiped = useRef(false);
 
   const load = useCallback(async () => {
     try {
@@ -86,7 +90,34 @@ export function Snap() {
     if (items.length > 0) setReveal({ items, index: 0 });
   }
 
+  function onTouchStart(event: TouchEvent) {
+    swiped.current = false;
+    if ((event.target as HTMLElement).closest('video')) {
+      start.current = null;
+      return;
+    }
+    const touch = event.touches[0];
+    start.current = { x: touch.clientX, y: touch.clientY };
+  }
+
+  function onTouchEnd(event: TouchEvent) {
+    const origin = start.current;
+    start.current = null;
+    if (!origin) return;
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - origin.x;
+    const dy = touch.clientY - origin.y;
+    if (Math.abs(dy) > Math.abs(dx) && dy > SWIPE) {
+      swiped.current = true;
+      close();
+    }
+  }
+
   function advance(event: MouseEvent) {
+    if (swiped.current) {
+      swiped.current = false;
+      return;
+    }
     if (!reveal || onVideo(event)) return;
     const next = reveal.index + 1;
     if (next < reveal.items.length) {
@@ -204,7 +235,12 @@ export function Snap() {
       </Link>
 
       {reveal && current && (
-        <div className="snap-reveal" onClick={advance}>
+        <div
+          className="snap-reveal"
+          onClick={advance}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
           <button className="snap-reveal-close" type="button" onClick={close}>
             ✕
           </button>
