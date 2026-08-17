@@ -5,7 +5,7 @@ import { config } from '../config.js';
 import { localDay } from '../day.js';
 import { UnsupportedTypeError, storeUpload, toMedia } from '../media/storage.js';
 import { onSnapSent } from '../notify/events.js';
-import { computeStreak, snapOfDay } from '../streak.js';
+import { computeStreak, snapsOfDay } from '../streak.js';
 import type { TodayState } from '../types.js';
 
 export const router = Router();
@@ -17,20 +17,21 @@ function otherProfile(me: string): string {
 function todayState(me: string): TodayState {
   const day = localDay();
   const other = otherProfile(me);
-  const mine = snapOfDay(me, day);
-  const theirs = snapOfDay(other, day);
-  const revealed = mine !== undefined;
+  const mine = snapsOfDay(me, day);
+  const theirs = snapsOfDay(other, day);
+  const revealed = mine.length > 0;
+  const lastTheirs = theirs[theirs.length - 1];
 
   return {
     localDay: day,
     streak: computeStreak(),
-    me: { profile: me, sent: mine !== undefined, media: mine ? toMedia(mine) : null },
+    me: { profile: me, sent: mine.length > 0, media: mine.map(toMedia) },
     other: {
       profile: other,
-      sent: theirs !== undefined,
+      sent: theirs.length > 0,
       revealed,
-      media: revealed && theirs ? toMedia(theirs) : null,
-      teaserUrl: theirs && !revealed ? `/api/media/${theirs.id}/teaser` : null,
+      media: revealed ? theirs.map(toMedia) : [],
+      teaserUrl: lastTheirs && !revealed ? `/api/media/${lastTheirs.id}/teaser` : null,
     },
   };
 }

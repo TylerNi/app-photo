@@ -28,12 +28,12 @@ export interface Streak {
 export interface TodayState {
   localDay: string;
   streak: Streak;
-  me: { profile: Profile; sent: boolean; media: Media | null };
+  me: { profile: Profile; sent: boolean; media: Media[] };
   other: {
     profile: Profile;
     sent: boolean;
     revealed: boolean;
-    media: Media | null;
+    media: Media[];
     teaserUrl: string | null;
   };
 }

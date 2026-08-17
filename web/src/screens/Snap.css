@@ -107,6 +107,44 @@
   text-align: center;
 }
 
+.snap-cover {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 24px;
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.snap-reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+
+.snap-reveal-media {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.snap-reveal-count {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--safe-bottom) + 12px);
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
 .snap-send {
   display: flex;
   flex-direction: column;

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ChangeEvent, CSSProperties } from 'react';
+import type { ChangeEvent, CSSProperties, MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiError } from '../api/client';
 import { getToday, sendSnap } from '../api/snap';
@@ -7,6 +7,16 @@ import type { Media, TodayState } from '../api/types';
 import { Button } from '../ui/Button';
 import { Spinner } from '../ui/Spinner';
 import './Snap.css';
+
+const SEEN_KEY = 'snap-seen';
+
+function loadSeen(): string[] {
+  return localStorage.getItem(SEEN_KEY)?.split(',') ?? [];
+}
+
+function onVideo(event: MouseEvent): boolean {
+  return (event.target as HTMLElement).closest('video') !== null;
+}
 
 function remaining(deadline: string): string {
   const ms = Math.max(0, new Date(deadline).getTime() - Date.now());
@@ -25,9 +35,10 @@ export function Snap() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
   const [progress, setProgress] = useState<number | null>(null);
+  const [seen, setSeen] = useState<string[]>(loadSeen);
+  const [reveal, setReveal] = useState<{ items: Media[]; index: number } | null>(null);
   const sending = useRef(false);
   const cameraInput = useRef<HTMLInputElement>(null);
-  const galleryInput = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     try {
@@ -67,6 +78,23 @@ export function Snap() {
     }
   }
 
+  function openReveal(items: Media[]) {
+    if (items.length > 0) setReveal({ items, index: 0 });
+  }
+
+  function advance(event: MouseEvent) {
+    if (!reveal || onVideo(event)) return;
+    const next = reveal.index + 1;
+    if (next < reveal.items.length) {
+      setReveal({ items: reveal.items, index: next });
+      return;
+    }
+    const merged = [...new Set([...seen, ...reveal.items.map((media) => media.id)])];
+    localStorage.setItem(SEEN_KEY, merged.join(','));
+    setSeen(merged);
+    setReveal(null);
+  }
+
   if (!state) {
     return loadError ? (
       <div className="snap-blank">
@@ -84,6 +112,9 @@ export function Snap() {
 
   const { streak, me, other } = state;
   const busy = progress !== null;
+  const unseen = other.media.filter((media) => !seen.includes(media.id));
+  const shown = other.media[other.media.length - 1];
+  const current = reveal ? reveal.items[reveal.index] : undefined;
 
   return (
     <div className="snap">
@@ -102,12 +133,21 @@ export function Snap() {
         )}
       </section>
 
-      {other.revealed && other.media ? (
-        <div className="snap-frame" style={frameStyle(other.media)}>
-          {other.media.kind === 'video' ? (
-            <video className="snap-media" src={other.media.originalUrl} controls playsInline />
+      {unseen.length > 0 ? (
+        <button className="snap-frame snap-cover" type="button" onClick={() => openReveal(unseen)}>
+          👀 Appuyer pour voir{' '}
+          {unseen.length > 1 ? `les ${unseen.length} photos` : 'la photo'} de {other.profile}
+        </button>
+      ) : shown ? (
+        <div
+          className="snap-frame"
+          style={frameStyle(shown)}
+          onClick={(event) => !onVideo(event) && openReveal(other.media)}
+        >
+          {shown.kind === 'video' ? (
+            <video className="snap-media" src={shown.originalUrl} controls playsInline />
           ) : (
-            <img className="snap-media" src={other.media.originalUrl} alt="" />
+            <img className="snap-media" src={shown.originalUrl} alt="" />
           )}
         </div>
       ) : other.sent && other.teaserUrl ? (
@@ -130,12 +170,8 @@ export function Snap() {
           hidden
           onChange={send}
         />
-        <input ref={galleryInput} type="file" accept="image/*,video/*" hidden onChange={send} />
         <Button disabled={busy} onClick={() => cameraInput.current?.click()}>
-          {me.sent ? 'Remplacer ma photo' : 'Prendre une photo'}
-        </Button>
-        <Button variant="secondary" disabled={busy} onClick={() => galleryInput.current?.click()}>
-          Choisir une photo
+          {me.sent ? 'Envoyer une autre photo' : 'Prendre une photo'}
         </Button>
         {busy && (
           <div className="snap-progress">
@@ -145,9 +181,11 @@ export function Snap() {
         {sendError && <p className="snap-send-error">{sendError}</p>}
       </section>
 
-      {me.sent && me.media && (
+      {me.media.length > 0 && (
         <section className="snap-mine">
-          <img className="snap-mine-thumb" src={me.media.thumbUrl} alt="" />
+          {me.media.map((media) => (
+            <img key={media.id} className="snap-mine-thumb" src={media.thumbUrl} alt="" />
+          ))}
           <span>Envoyé ✅</span>
         </section>
       )}
@@ -155,6 +193,27 @@ export function Snap() {
       <Link className="snap-album" to="/album">
         Voir l'album
       </Link>
+
+      {reveal && current && (
+        <div className="snap-reveal" onClick={advance}>
+          {current.kind === 'video' ? (
+            <video
+              className="snap-reveal-media"
+              src={current.originalUrl}
+              controls
+              playsInline
+              autoPlay
+            />
+          ) : (
+            <img className="snap-reveal-media" src={current.originalUrl} alt="" />
+          )}
+          {reveal.items.length > 1 && (
+            <p className="snap-reveal-count">
+              {reveal.index + 1} / {reveal.items.length}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

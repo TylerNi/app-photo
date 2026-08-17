@@ -12,11 +12,10 @@ const completeDaysStmt = db.prepare(`
   ORDER BY local_day DESC
 `);
 
-const snapOfDayStmt = db.prepare(`
+const snapsOfDayStmt = db.prepare(`
   SELECT * FROM media
   WHERE source = 'snap' AND owner = ? AND local_day = ?
-  ORDER BY created_at DESC, id DESC
-  LIMIT 1
+  ORDER BY created_at ASC, id ASC
 `);
 
 const hasSnapStmt = db.prepare(
@@ -56,8 +55,8 @@ export function computeStreak(now: Date = new Date()): Streak {
   };
 }
 
-export function snapOfDay(profile: string, day: string): MediaRow | undefined {
-  return snapOfDayStmt.get(profile, day) as MediaRow | undefined;
+export function snapsOfDay(profile: string, day: string): MediaRow[] {
+  return snapsOfDayStmt.all(profile, day) as MediaRow[];
 }
 
 export function hasSnap(profile: string, day: string): boolean {
