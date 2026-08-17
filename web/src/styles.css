@@ -197,3 +197,70 @@ button {
   overflow-y: auto;
   padding: 16px 16px calc(var(--safe-bottom) + 16px);
 }
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.sheet {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 100%;
+  padding: 0 12px calc(var(--safe-bottom) + 12px);
+}
+
+.sheet button {
+  min-height: 52px;
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.sheet-question {
+  padding: 16px 12px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 15px;
+  text-align: center;
+}
+
+.sheet-danger {
+  color: var(--danger);
+}
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-back {
+  color: var(--muted);
+  font-size: 17px;
+  text-decoration: none;
+}
+
+.settings-action {
+  text-align: center;
+}
+
+.settings-done {
+  color: var(--muted);
+  font-size: 15px;
+  text-align: center;
+}
+
+.settings-error {
+  color: var(--danger);
+  font-size: 15px;
+  text-align: center;
+}

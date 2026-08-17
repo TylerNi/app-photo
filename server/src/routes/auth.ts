@@ -18,6 +18,11 @@ router.get('/me', (req, res) => {
   res.json({ authenticated, profile, profiles: config.profiles });
 });
 
+router.post('/logout', requireAuth, (_req, res) => {
+  setSession(res, null);
+  res.status(204).end();
+});
+
 router.post('/profile', requireAuth, (req, res) => {
   const profile = req.body?.profile;
   if (typeof profile !== 'string' || !config.profiles.includes(profile)) {

@@ -23,6 +23,11 @@ CREATE INDEX IF NOT EXISTS idx_media_day    ON media (local_day);
 CREATE INDEX IF NOT EXISTS idx_media_recent ON media (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_media_snap   ON media (source, local_day, owner);
 
+CREATE TABLE IF NOT EXISTS streak_reset (
+  id  INTEGER PRIMARY KEY CHECK (id = 1),
+  day TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS push_subscriptions (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   profile    TEXT NOT NULL,

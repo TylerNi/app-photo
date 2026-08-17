@@ -9,6 +9,7 @@ import { reprobeTakenAt } from './media/reprobe.js';
 import { router as authRouter } from './routes/auth.js';
 import { router as mediaRouter } from './routes/media.js';
 import { router as pushRouter } from './routes/push.js';
+import { router as settingsRouter } from './routes/settings.js';
 import { router as snapRouter } from './routes/snap.js';
 
 const app = express();
@@ -26,6 +27,7 @@ app.use('/api/auth', authRouter);
 app.use('/api', requireAuth, mediaRouter);
 app.use('/api', requireAuth, snapRouter);
 app.use('/api', requireAuth, pushRouter);
+app.use('/api', requireAuth, settingsRouter);
 
 app.use('/api', (_req, res) => {
   res.status(404).json({ error: 'not_found', message: 'Route inconnue.' });

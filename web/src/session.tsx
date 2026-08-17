@@ -14,6 +14,7 @@ interface Session extends Me {
   other: Profile | null;
   login: (password: string) => Promise<void>;
   chooseProfile: (name: Profile) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const ANONYMOUS: Me = { authenticated: false, profile: null, profiles: [] };
@@ -55,6 +56,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     [refresh],
   );
 
+  const logout = useCallback(async () => {
+    await apiPost<void>('/api/auth/logout');
+    await refresh();
+  }, [refresh]);
+
   const value = useMemo<Session>(
     () => ({
       ...me,
@@ -62,8 +68,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       other: me.profiles.find((name) => name !== me.profile) ?? null,
       login,
       chooseProfile,
+      logout,
     }),
-    [me, ready, login, chooseProfile],
+    [me, ready, login, chooseProfile, logout],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

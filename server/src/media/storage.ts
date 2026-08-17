@@ -70,6 +70,17 @@ export function getMediaRow(id: string): MediaRow | undefined {
   return db.prepare('SELECT * FROM media WHERE id = ?').get(id) as MediaRow | undefined;
 }
 
+const deleteMediaStmt = db.prepare('DELETE FROM media WHERE id = ?');
+
+export async function deleteMedia(rows: MediaRow[]): Promise<void> {
+  for (const row of rows) {
+    for (const path of [row.storage_path, row.thumb_path, row.teaser_path]) {
+      if (path) await rm(resolve(config.dataDir, path), { force: true });
+    }
+    deleteMediaStmt.run(row.id);
+  }
+}
+
 const insertMedia = db.prepare(`
   INSERT INTO media (
     id, owner, kind, source, original_name, mime, bytes, width, height,

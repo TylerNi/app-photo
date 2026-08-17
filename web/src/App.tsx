@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Album } from './screens/Album';
 import { Login } from './screens/Login';
 import { ProfilePick } from './screens/ProfilePick';
+import { Settings } from './screens/Settings';
 import { Snap } from './screens/Snap';
 import { useSession } from './session';
 import { AppShell } from './ui/AppShell';
@@ -30,6 +31,7 @@ export function App() {
             <Route path="/" element={<Snap />} />
             <Route path="/album" element={<Album />} />
             <Route path="/profil" element={<ProfilePick />} />
+            <Route path="/reglages" element={<Settings />} />
           </Routes>
         </AppShell>
       )}

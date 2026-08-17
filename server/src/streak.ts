@@ -7,9 +7,15 @@ const completeDaysStmt = db.prepare(`
   SELECT local_day
   FROM media
   WHERE source = 'snap'
+    AND local_day > COALESCE((SELECT day FROM streak_reset WHERE id = 1), '')
   GROUP BY local_day
   HAVING COUNT(DISTINCT owner) = 2
   ORDER BY local_day DESC
+`);
+
+const resetStreakStmt = db.prepare(`
+  INSERT INTO streak_reset (id, day) VALUES (1, ?)
+  ON CONFLICT(id) DO UPDATE SET day = excluded.day
 `);
 
 const snapsOfDayStmt = db.prepare(`
@@ -39,6 +45,10 @@ function previousDay(day: string): string {
 
 export function completeDays(): string[] {
   return (completeDaysStmt.all() as { local_day: string }[]).map((row) => row.local_day);
+}
+
+export function resetStreak(now: Date = new Date()): void {
+  resetStreakStmt.run(localDay(now));
 }
 
 export function computeStreak(now: Date = new Date()): Streak {
