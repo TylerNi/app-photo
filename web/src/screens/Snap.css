@@ -1,0 +1,163 @@
+.snap {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.snap-blank {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding-top: 48px;
+}
+
+.snap-load-error {
+  color: var(--danger);
+  font-size: 15px;
+  text-align: center;
+}
+
+.snap-streak {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.snap-current {
+  font-size: clamp(40px, 14vw, 64px);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.snap-current span {
+  font-size: 0.4em;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.snap-none {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.snap-total {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.snap-done {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.snap-risk {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--danger);
+  text-align: center;
+}
+
+.snap-frame {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.snap-frame-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: var(--muted);
+  font-size: 15px;
+  text-align: center;
+}
+
+.snap-media {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+.snap-teaser {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  filter: blur(24px);
+  transform: scale(1.1);
+}
+
+.snap-veil {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.45);
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.snap-send {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.snap-progress {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--surface);
+}
+
+.snap-progress-bar {
+  height: 100%;
+  background: var(--text);
+  transition: width 0.15s linear;
+}
+
+.snap-send-error {
+  color: var(--danger);
+  font-size: 15px;
+  text-align: center;
+}
+
+.snap-mine {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.snap-mine-thumb {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.snap-album {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 600;
+  text-decoration: none;
+}
