@@ -10,6 +10,7 @@ import { Spinner } from '../ui/Spinner';
 import './Snap.css';
 
 const SWIPE = 50;
+const SLIDE = 220;
 
 function seenKey(profile: string): string {
   return `snap-seen-${profile}`;
@@ -43,6 +44,9 @@ export function Snap() {
   const [progress, setProgress] = useState<number | null>(null);
   const [seen, setSeen] = useState<string[]>(() => loadSeen(profile!));
   const [reveal, setReveal] = useState<{ items: Media[]; index: number } | null>(null);
+  const [drag, setDrag] = useState(0);
+  const [held, setHeld] = useState(false);
+  const [closing, setClosing] = useState(false);
   const sending = useRef(false);
   const cameraInput = useRef<HTMLInputElement>(null);
   const start = useRef<{ x: number; y: number } | null>(null);
@@ -98,19 +102,34 @@ export function Snap() {
     }
     const touch = event.touches[0];
     start.current = { x: touch.clientX, y: touch.clientY };
+    setHeld(true);
+  }
+
+  function onTouchMove(event: TouchEvent) {
+    const origin = start.current;
+    if (!origin) return;
+    const touch = event.touches[0];
+    const dx = touch.clientX - origin.x;
+    const dy = touch.clientY - origin.y;
+    setDrag(dy > 0 && dy > Math.abs(dx) ? dy : 0);
   }
 
   function onTouchEnd(event: TouchEvent) {
     const origin = start.current;
     start.current = null;
+    setHeld(false);
     if (!origin) return;
     const touch = event.changedTouches[0];
     const dx = touch.clientX - origin.x;
     const dy = touch.clientY - origin.y;
     if (Math.abs(dy) > Math.abs(dx) && dy > SWIPE) {
+      event.preventDefault();
       swiped.current = true;
-      close();
+      setClosing(true);
+      window.setTimeout(close, SLIDE);
+      return;
     }
+    setDrag(0);
   }
 
   function advance(event: MouseEvent) {
@@ -118,7 +137,7 @@ export function Snap() {
       swiped.current = false;
       return;
     }
-    if (!reveal || onVideo(event)) return;
+    if (!reveal || closing || onVideo(event)) return;
     const next = reveal.index + 1;
     if (next < reveal.items.length) {
       setReveal({ items: reveal.items, index: next });
@@ -133,6 +152,9 @@ export function Snap() {
     localStorage.setItem(seenKey(profile!), merged.join(','));
     setSeen(merged);
     setReveal(null);
+    setDrag(0);
+    setHeld(false);
+    setClosing(false);
   }
 
   if (!state) {
@@ -236,9 +258,11 @@ export function Snap() {
 
       {reveal && current && (
         <div
-          className="snap-reveal"
+          className={`snap-reveal${held ? ' snap-reveal-held' : ''}${closing ? ' snap-reveal-closing' : ''}`}
+          style={{ '--drag': `${drag}px` } as CSSProperties}
           onClick={advance}
           onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
         >
           <button className="snap-reveal-close" type="button" onClick={close}>

@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import type { TouchEvent } from 'react';
+import type { CSSProperties, TouchEvent } from 'react';
 import type { Media } from '../api/types';
 
 const SWIPE = 50;
+const SLIDE = 220;
 
 function stamp(media: Media): string {
   return new Date(media.createdAt).toLocaleString('fr-FR', {
@@ -26,6 +27,9 @@ export function Viewer({
   onClose: () => void;
 }) {
   const [fallback, setFallback] = useState(false);
+  const [drag, setDrag] = useState(0);
+  const [held, setHeld] = useState(false);
+  const [closing, setClosing] = useState(false);
   const start = useRef<{ x: number; y: number } | null>(null);
   const media = items[index];
 
@@ -56,25 +60,49 @@ export function Viewer({
     }
     const touch = event.touches[0];
     start.current = { x: touch.clientX, y: touch.clientY };
+    setHeld(true);
+  }
+
+  function onTouchMove(event: TouchEvent) {
+    const origin = start.current;
+    if (!origin) return;
+    const touch = event.touches[0];
+    const dx = touch.clientX - origin.x;
+    const dy = touch.clientY - origin.y;
+    setDrag(dy > 0 && dy > Math.abs(dx) ? dy : 0);
   }
 
   function onTouchEnd(event: TouchEvent) {
     const origin = start.current;
     start.current = null;
+    setHeld(false);
     if (!origin) return;
     const touch = event.changedTouches[0];
     const dx = touch.clientX - origin.x;
     const dy = touch.clientY - origin.y;
     if (Math.abs(dy) > Math.abs(dx)) {
-      if (dy > SWIPE) onClose();
+      if (dy > SWIPE) {
+        event.preventDefault();
+        setClosing(true);
+        window.setTimeout(onClose, SLIDE);
+        return;
+      }
+      setDrag(0);
       return;
     }
+    setDrag(0);
     if (dx > SWIPE && index > 0) onIndex(index - 1);
     if (dx < -SWIPE && index < items.length - 1) onIndex(index + 1);
   }
 
   return (
-    <div className="viewer" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+    <div
+      className={`viewer${held ? ' viewer-held' : ''}${closing ? ' viewer-closing' : ''}`}
+      style={{ '--drag': `${drag}px` } as CSSProperties}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       <button className="viewer-close" type="button" onClick={onClose}>
         ✕
       </button>
