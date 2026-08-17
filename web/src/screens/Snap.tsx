@@ -212,9 +212,12 @@ export function Snap() {
       </section>
 
       {unseen.length > 0 ? (
-        <button className="snap-frame snap-cover" type="button" onClick={() => openReveal(unseen)}>
-          👀 Appuyer pour voir{' '}
-          {unseen.length > 1 ? `les ${unseen.length} photos` : 'la photo'} de {other.profile}
+        <button className="snap-frame" type="button" onClick={() => openReveal(unseen)}>
+          <img className="snap-teaser" src={unseen[unseen.length - 1].thumbUrl} alt="" />
+          <span className="snap-veil">
+            👀 Appuyer pour voir{' '}
+            {unseen.length > 1 ? `les ${unseen.length} photos` : 'la photo'} de {other.profile}
+          </span>
         </button>
       ) : shown ? (
         <div
