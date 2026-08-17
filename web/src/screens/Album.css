@@ -207,6 +207,20 @@
 .viewer-stage {
   flex: 1;
   min-height: 0;
+  overflow: hidden;
+  transform: translateY(var(--dragy, 0px));
+  transition: transform 0.22s ease;
+}
+
+.viewer-track {
+  display: flex;
+  height: 100%;
+  transform: translateX(calc(-100% + var(--dragx, 0px)));
+  transition: transform 0.22s ease;
+}
+
+.viewer-slide {
+  flex: 0 0 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -216,16 +230,54 @@
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  transform: translateY(var(--drag, 0px));
-  transition: transform 0.22s ease;
 }
 
-.viewer-held .viewer-media {
+.viewer-held .viewer-stage,
+.viewer-held .viewer-track,
+.viewer-jump .viewer-track {
   transition: none;
 }
 
-.viewer-closing .viewer-media {
+.viewer-closing .viewer-stage {
   transform: translateY(100vh);
+}
+
+.viewer-strip {
+  display: flex;
+  gap: 3px;
+  overflow-x: auto;
+  padding: 4px 16px calc(var(--safe-bottom) + 12px);
+  touch-action: pan-x;
+  scrollbar-width: none;
+}
+
+.viewer-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.viewer-thumb {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--surface);
+  opacity: 0.5;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+}
+
+.viewer-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.viewer-thumb-active {
+  opacity: 1;
+  transform: scale(1.12);
 }
 
 .viewer-caption {
