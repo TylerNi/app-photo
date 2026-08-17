@@ -228,12 +228,12 @@ export function Snap() {
           )}
         </div>
       ) : other.sent && other.teaserUrl ? (
-        <div className="snap-frame">
+        <div className="snap-frame snap-frame-short">
           <img className="snap-teaser" src={other.teaserUrl} alt="" />
           <p className="snap-veil">Envoie ta photo pour voir celle de {other.profile} 👀</p>
         </div>
       ) : (
-        <div className="snap-frame snap-frame-empty">
+        <div className="snap-frame snap-frame-short snap-frame-empty">
           <p>{other.profile} n'a pas encore envoyé sa photo</p>
         </div>
       )}
@@ -257,15 +257,6 @@ export function Snap() {
         )}
         {sendError && <p className="snap-send-error">{sendError}</p>}
       </section>
-
-      {me.media.length > 0 && (
-        <section className="snap-mine">
-          {me.media.map((media) => (
-            <img key={media.id} className="snap-mine-thumb" src={media.thumbUrl} alt="" />
-          ))}
-          <span>Envoyé ✅</span>
-        </section>
-      )}
 
       <Link className="snap-album" to="/album">
         Voir l'album

@@ -74,6 +74,11 @@
   background: var(--surface);
 }
 
+.snap-frame-short {
+  aspect-ratio: auto;
+  height: 200px;
+}
+
 .snap-frame-empty {
   display: flex;
   align-items: center;
@@ -200,22 +205,6 @@
   color: var(--danger);
   font-size: 15px;
   text-align: center;
-}
-
-.snap-mine {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  color: var(--muted);
-}
-
-.snap-mine-thumb {
-  width: 48px;
-  height: 48px;
-  object-fit: cover;
-  border-radius: 10px;
-  background: var(--surface);
 }
 
 .snap-album {
