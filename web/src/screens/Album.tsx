@@ -234,7 +234,7 @@ export function Album() {
         <input
           ref={fileInput}
           type="file"
-          accept="image/*,video/*"
+          accept="image/*,image/heic,image/heif,video/*"
           multiple
           hidden
           onChange={addFiles}
