@@ -22,6 +22,16 @@ const hasSnapStmt = db.prepare(
   "SELECT 1 FROM media WHERE source = 'snap' AND owner = ? AND local_day = ? LIMIT 1",
 );
 
+const lastSnapDayStmt = db.prepare(
+  "SELECT local_day FROM media WHERE source = 'snap' AND owner = ? ORDER BY local_day DESC LIMIT 1",
+);
+
+const allSnapsStmt = db.prepare(`
+  SELECT id, owner FROM media
+  WHERE source = 'snap'
+  ORDER BY created_at ASC, id ASC
+`);
+
 function previousDay(day: string): string {
   const instant = new Date(`${day}T00:00:00Z`).getTime() - 86400000;
   return new Date(instant).toISOString().slice(0, 10);
@@ -61,4 +71,26 @@ export function snapsOfDay(profile: string, day: string): MediaRow[] {
 
 export function hasSnap(profile: string, day: string): boolean {
   return hasSnapStmt.get(profile, day) !== undefined;
+}
+
+export function lastSnapDay(profile: string): string | undefined {
+  return (lastSnapDayStmt.get(profile) as { local_day: string } | undefined)?.local_day;
+}
+
+export function lockedSnapIds(): string[] {
+  const rows = allSnapsStmt.all() as { id: string; owner: string }[];
+  let pending: string[] = [];
+  let owner: string | null = null;
+
+  for (const row of rows) {
+    if (pending.length > 0 && row.owner !== owner) {
+      pending = [];
+      owner = null;
+      continue;
+    }
+    pending.push(row.id);
+    owner = row.owner;
+  }
+
+  return pending;
 }

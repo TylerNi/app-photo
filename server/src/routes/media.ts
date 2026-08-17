@@ -9,21 +9,14 @@ import { db } from '../db.js';
 import type { MediaRow } from '../media/storage.js';
 import { UnsupportedTypeError, getMediaRow, storeUpload, toMedia } from '../media/storage.js';
 import { onAlbumUpload } from '../notify/events.js';
-import { hasSnap } from '../streak.js';
+import { lockedSnapIds } from '../streak.js';
 import type { Media } from '../types.js';
 
 export const router = Router();
 
 type AlbumRow = MediaRow & { sort_at: string };
 
-const VISIBLE = `
-  source <> 'snap' OR local_day IN (
-    SELECT local_day FROM media
-    WHERE source = 'snap'
-    GROUP BY local_day
-    HAVING COUNT(DISTINCT owner) = 2
-  )
-`;
+const VISIBLE = "source <> 'snap' OR id NOT IN (SELECT value FROM json_each(@locked))";
 
 const listFirstPage = db.prepare(`
   SELECT *, COALESCE(taken_at, created_at) AS sort_at FROM media
@@ -41,7 +34,7 @@ const listAfterCursor = db.prepare(`
 `);
 
 function revealBlocked(row: MediaRow, me: string): boolean {
-  return row.source === 'snap' && row.owner !== me && !hasSnap(me, row.local_day);
+  return row.source === 'snap' && row.owner !== me && lockedSnapIds().includes(row.id);
 }
 
 function notFound(res: Response): void {
@@ -116,7 +109,7 @@ router.get('/album', requireProfile, (req, res) => {
   const requested = Number(req.query.limit ?? 60);
   const limit = Math.min(Number.isFinite(requested) && requested > 0 ? requested : 60, 200);
 
-  const params = { limit: limit + 1 };
+  const params = { limit: limit + 1, locked: JSON.stringify(lockedSnapIds()) };
 
   const before = typeof req.query.before === 'string' ? req.query.before : null;
   let rows: AlbumRow[];

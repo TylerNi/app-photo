@@ -5,7 +5,7 @@ import { config } from '../config.js';
 import { localDay } from '../day.js';
 import { UnsupportedTypeError, storeUpload, toMedia } from '../media/storage.js';
 import { onSnapSent } from '../notify/events.js';
-import { computeStreak, snapsOfDay } from '../streak.js';
+import { computeStreak, lastSnapDay, lockedSnapIds, snapsOfDay } from '../streak.js';
 import type { TodayState } from '../types.js';
 
 export const router = Router();
@@ -18,8 +18,11 @@ function todayState(me: string): TodayState {
   const day = localDay();
   const other = otherProfile(me);
   const mine = snapsOfDay(me, day);
-  const theirs = snapsOfDay(other, day);
-  const revealed = mine.length > 0;
+  const theirDay = lastSnapDay(other);
+  const theirs = theirDay ? snapsOfDay(other, theirDay) : [];
+  const locked = lockedSnapIds();
+  const visible = theirs.filter((row) => !locked.includes(row.id));
+  const revealed = visible.length > 0;
   const lastTheirs = theirs[theirs.length - 1];
 
   return {
@@ -30,7 +33,7 @@ function todayState(me: string): TodayState {
       profile: other,
       sent: theirs.length > 0,
       revealed,
-      media: revealed ? theirs.map(toMedia) : [],
+      media: visible.map(toMedia),
       teaserUrl: lastTheirs && !revealed ? `/api/media/${lastTheirs.id}/teaser` : null,
     },
   };

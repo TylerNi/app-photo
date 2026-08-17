@@ -4,14 +4,17 @@ import { Link } from 'react-router-dom';
 import { ApiError } from '../api/client';
 import { getToday, sendSnap } from '../api/snap';
 import type { Media, TodayState } from '../api/types';
+import { useSession } from '../session';
 import { Button } from '../ui/Button';
 import { Spinner } from '../ui/Spinner';
 import './Snap.css';
 
-const SEEN_KEY = 'snap-seen';
+function seenKey(profile: string): string {
+  return `snap-seen-${profile}`;
+}
 
-function loadSeen(): string[] {
-  return localStorage.getItem(SEEN_KEY)?.split(',') ?? [];
+function loadSeen(profile: string): string[] {
+  return localStorage.getItem(seenKey(profile))?.split(',') ?? [];
 }
 
 function onVideo(event: MouseEvent): boolean {
@@ -31,11 +34,12 @@ function frameStyle(media: Media): CSSProperties | undefined {
 }
 
 export function Snap() {
+  const { profile } = useSession();
   const [state, setState] = useState<TodayState | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [sendError, setSendError] = useState<string | null>(null);
   const [progress, setProgress] = useState<number | null>(null);
-  const [seen, setSeen] = useState<string[]>(loadSeen);
+  const [seen, setSeen] = useState<string[]>(() => loadSeen(profile!));
   const [reveal, setReveal] = useState<{ items: Media[]; index: number } | null>(null);
   const sending = useRef(false);
   const cameraInput = useRef<HTMLInputElement>(null);
@@ -89,8 +93,13 @@ export function Snap() {
       setReveal({ items: reveal.items, index: next });
       return;
     }
+    close();
+  }
+
+  function close() {
+    if (!reveal) return;
     const merged = [...new Set([...seen, ...reveal.items.map((media) => media.id)])];
-    localStorage.setItem(SEEN_KEY, merged.join(','));
+    localStorage.setItem(seenKey(profile!), merged.join(','));
     setSeen(merged);
     setReveal(null);
   }
@@ -196,6 +205,9 @@ export function Snap() {
 
       {reveal && current && (
         <div className="snap-reveal" onClick={advance}>
+          <button className="snap-reveal-close" type="button" onClick={close}>
+            ✕
+          </button>
           {current.kind === 'video' ? (
             <video
               className="snap-reveal-media"

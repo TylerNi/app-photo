@@ -129,6 +129,16 @@
   background: #000;
 }
 
+.snap-reveal-close {
+  position: absolute;
+  right: 8px;
+  top: calc(var(--safe-top) + 8px);
+  z-index: 1;
+  width: 44px;
+  height: 44px;
+  font-size: 22px;
+}
+
 .snap-reveal-media {
   max-width: 100%;
   max-height: 100%;
