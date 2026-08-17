@@ -245,7 +245,7 @@ export function Snap() {
         <input
           ref={cameraInput}
           type="file"
-          accept="image/*,image/heic,image/heif"
+          accept="image/*"
           capture="environment"
           hidden
           onChange={send}
