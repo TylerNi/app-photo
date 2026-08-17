@@ -23,3 +23,9 @@ db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
 db.exec(readFileSync(resolve(import.meta.dirname, 'schema.sql'), 'utf8'));
+
+for (const column of ['sha256 TEXT', 'phash TEXT']) {
+  try {
+    db.exec(`ALTER TABLE media ADD COLUMN ${column}`);
+  } catch {}
+}

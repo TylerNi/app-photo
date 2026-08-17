@@ -16,6 +16,23 @@
   text-decoration: none;
 }
 
+.album-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.album-dupes {
+  padding: 0 14px;
+  height: 36px;
+  border-radius: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+}
+
 .album-add {
   display: flex;
   align-items: center;
@@ -294,4 +311,103 @@
 
 .viewer-fallback {
   font-size: 12px;
+}
+
+.dupes {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--bg);
+  padding: calc(var(--safe-top) + 12px) 16px calc(var(--safe-bottom) + 16px);
+}
+
+.dupes-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.dupes-count {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.dupes-close {
+  width: 44px;
+  height: 44px;
+  font-size: 22px;
+}
+
+.dupes-verdict {
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.dupes-pair {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.dupes-item {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dupes-item img {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.dupes-item figcaption {
+  display: flex;
+  flex-direction: column;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+.dupes-item strong {
+  color: var(--text);
+  font-size: 13px;
+}
+
+.dupes-drop strong {
+  color: var(--danger);
+}
+
+.dupes-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.dupes-done {
+  color: var(--muted);
+  font-size: 16px;
+  text-align: center;
+}
+
+.dupes-error {
+  color: var(--danger);
+  font-size: 15px;
+  text-align: center;
 }

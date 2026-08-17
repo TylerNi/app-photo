@@ -16,7 +16,9 @@ CREATE TABLE IF NOT EXISTS media (
   thumb_path    TEXT,
   teaser_path   TEXT,
   derive_status TEXT NOT NULL DEFAULT 'pending'
-                CHECK (derive_status IN ('pending','ready','failed'))
+                CHECK (derive_status IN ('pending','ready','failed')),
+  sha256        TEXT,
+  phash         TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_media_day    ON media (local_day);

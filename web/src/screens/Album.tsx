@@ -6,6 +6,7 @@ import { listAlbum, uploadToAlbum } from '../api/media';
 import type { Media } from '../api/types';
 import { useSession } from '../session';
 import { Spinner } from '../ui/Spinner';
+import { Duplicates } from './Duplicates';
 import { Viewer } from './Viewer';
 import './Album.css';
 
@@ -89,6 +90,7 @@ export function Album() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [upload, setUpload] = useState<{ index: number; total: number; pct: number } | null>(null);
   const [failures, setFailures] = useState<string[]>([]);
+  const [dupes, setDupes] = useState(false);
 
   const cursor = useRef<string | null>(null);
   const loading = useRef(false);
@@ -239,14 +241,19 @@ export function Album() {
           hidden
           onChange={addFiles}
         />
-        <button
-          className="album-add"
-          type="button"
-          disabled={upload !== null}
-          onClick={() => fileInput.current?.click()}
-        >
-          +
-        </button>
+        <div className="album-bar-actions">
+          <button className="album-dupes" type="button" onClick={() => setDupes(true)}>
+            Doublons
+          </button>
+          <button
+            className="album-add"
+            type="button"
+            disabled={upload !== null}
+            onClick={() => fileInput.current?.click()}
+          >
+            +
+          </button>
+        </div>
       </div>
 
       {upload && (
@@ -349,6 +356,15 @@ export function Album() {
             </button>
           </div>
         </div>
+      )}
+
+      {dupes && (
+        <Duplicates
+          onDeleted={(ids) =>
+            setItems((previous) => previous.filter((media) => !ids.includes(media.id)))
+          }
+          onClose={() => setDupes(false)}
+        />
       )}
 
       {viewer !== null && (

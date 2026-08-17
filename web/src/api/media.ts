@@ -1,5 +1,5 @@
-import { apiGet, apiUpload } from './client';
-import type { Media } from './types';
+import { apiDelete, apiGet, apiUpload } from './client';
+import type { DuplicateGroup, Media } from './types';
 
 export function listAlbum(
   before?: string,
@@ -12,6 +12,14 @@ export function listAlbum(
   return apiGet<{ items: Media[]; nextCursor: string | null }>(
     query ? `/api/album?${query}` : '/api/album',
   );
+}
+
+export function listDuplicates(): Promise<{ groups: DuplicateGroup[] }> {
+  return apiGet<{ groups: DuplicateGroup[] }>('/api/album/duplicates');
+}
+
+export function deleteMedia(id: string): Promise<void> {
+  return apiDelete<void>(`/api/media/${id}`);
 }
 
 export async function uploadToAlbum(

@@ -6,8 +6,15 @@ import { resolve } from 'node:path';
 import { requireProfile } from '../auth.js';
 import { config } from '../config.js';
 import { db } from '../db.js';
+import { hammingDistance } from '../media/hash.js';
 import type { MediaRow } from '../media/storage.js';
-import { UnsupportedTypeError, getMediaRow, storeUpload, toMedia } from '../media/storage.js';
+import {
+  UnsupportedTypeError,
+  deleteMedia,
+  getMediaRow,
+  storeUpload,
+  toMedia,
+} from '../media/storage.js';
 import { onAlbumUpload } from '../notify/events.js';
 import { lockedSnapIds } from '../streak.js';
 import type { Media } from '../types.js';
@@ -134,6 +141,60 @@ router.get('/album', requireProfile, (req, res) => {
   const nextCursor = rows.length > limit && last ? `${last.sort_at}|${last.id}` : null;
 
   res.json({ items: page.map(toMedia), nextCursor });
+});
+
+const SIMILAR = 5;
+
+const albumRows = db.prepare("SELECT * FROM media WHERE source = 'album' ORDER BY created_at, id");
+
+function quality(row: MediaRow): number {
+  return (row.width ?? 0) * (row.height ?? 0);
+}
+
+function alike(a: MediaRow, b: MediaRow): boolean {
+  if (a.sha256 !== null && a.sha256 === b.sha256) return true;
+  return a.phash !== null && b.phash !== null && hammingDistance(a.phash, b.phash) <= SIMILAR;
+}
+
+router.get('/album/duplicates', requireProfile, (_req, res) => {
+  const rows = albumRows.all() as MediaRow[];
+  const taken = new Set<string>();
+  const groups: { exact: boolean; items: Media[] }[] = [];
+
+  for (const row of rows) {
+    if (taken.has(row.id)) continue;
+    const members = [row];
+    for (const other of rows) {
+      if (taken.has(other.id) || other.id === row.id) continue;
+      if (members.some((member) => alike(member, other))) {
+        members.push(other);
+        taken.add(other.id);
+      }
+    }
+    if (members.length < 2) continue;
+    taken.add(row.id);
+    members.sort((a, b) => quality(b) - quality(a) || b.bytes - a.bytes);
+    groups.push({
+      exact: members.every((member) => member.sha256 !== null && member.sha256 === row.sha256),
+      items: members.map(toMedia),
+    });
+  }
+
+  res.json({ groups });
+});
+
+router.delete('/media/:id', requireProfile, async (req, res) => {
+  const row = getMediaRow(String(req.params.id));
+  if (!row) {
+    notFound(res);
+    return;
+  }
+  if (revealBlocked(row, req.profile!)) {
+    notRevealed(res);
+    return;
+  }
+  await deleteMedia([row]);
+  res.status(204).end();
 });
 
 router.get('/media/:id/original', requireProfile, (req, res) => {

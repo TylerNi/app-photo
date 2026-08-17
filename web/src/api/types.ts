@@ -17,6 +17,11 @@ export interface Media {
   originalUrl: string;
 }
 
+export interface DuplicateGroup {
+  exact: boolean;
+  items: Media[];
+}
+
 export interface Streak {
   current: number;
   total: number;

@@ -6,6 +6,7 @@ import { db } from '../db.js';
 import { localDay } from '../day.js';
 import type { Media } from '../types.js';
 import { makeTeaser, makeThumb } from './derive.js';
+import { perceptualHash, sha256File } from './hash.js';
 import { probeImage, probeVideo } from './probe.js';
 
 export interface MediaRow {
@@ -26,6 +27,8 @@ export interface MediaRow {
   thumb_path: string | null;
   teaser_path: string | null;
   derive_status: 'pending' | 'ready' | 'failed';
+  sha256: string | null;
+  phash: string | null;
 }
 
 export class UnsupportedTypeError extends Error {}
@@ -84,15 +87,16 @@ export async function deleteMedia(rows: MediaRow[]): Promise<void> {
 const insertMedia = db.prepare(`
   INSERT INTO media (
     id, owner, kind, source, original_name, mime, bytes, width, height,
-    duration_ms, taken_at, created_at, local_day, storage_path, derive_status
+    duration_ms, taken_at, created_at, local_day, storage_path, derive_status, sha256
   ) VALUES (
     @id, @owner, @kind, @source, @original_name, @mime, @bytes, @width, @height,
-    @duration_ms, @taken_at, @created_at, @local_day, @storage_path, 'pending'
+    @duration_ms, @taken_at, @created_at, @local_day, @storage_path, 'pending', @sha256
   )
 `);
 
 const updateDerived = db.prepare(`
-  UPDATE media SET thumb_path = @thumb_path, teaser_path = @teaser_path, derive_status = @derive_status
+  UPDATE media SET thumb_path = @thumb_path, teaser_path = @teaser_path,
+    derive_status = @derive_status, phash = @phash
   WHERE id = @id
 `);
 
@@ -145,6 +149,7 @@ export async function storeUpload(
     created_at: now.toISOString(),
     local_day: day,
     storage_path: storagePath,
+    sha256: await sha256File(absoluteStoragePath),
   });
 
   const thumbPath = `thumbs/${id}.jpg`;
@@ -166,6 +171,7 @@ export async function storeUpload(
     thumb_path: thumbOk ? thumbPath : null,
     teaser_path: teaserPath,
     derive_status: thumbOk && teaserOk ? 'ready' : 'failed',
+    phash: thumbOk ? await perceptualHash(resolve(config.dataDir, thumbPath)) : null,
   });
 
   return toMedia(getMediaRow(id)!);
