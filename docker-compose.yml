@@ -1,0 +1,21 @@
+services:
+  app-photo:
+    image: ghcr.io/tylerni/app-photo:latest
+    container_name: app-photo
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT}:8080"
+    environment:
+      APP_PASSWORD: ${APP_PASSWORD}
+      SESSION_SECRET: ${SESSION_SECRET}
+      PUBLIC_URL: ${PUBLIC_URL}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
+      VAPID_SUBJECT: ${VAPID_SUBJECT}
+      PROFILES: ${PROFILES}
+      APP_TZ: ${APP_TZ}
+      REMINDER_1: ${REMINDER_1}
+      REMINDER_2: ${REMINDER_2}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB}
+    volumes:
+      - ${DATA_PATH}:/data
