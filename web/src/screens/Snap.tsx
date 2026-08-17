@@ -181,13 +181,28 @@ export function Snap() {
   return (
     <div className="snap">
       <section className="snap-streak">
-        <p className="snap-current">
-          🔥 {streak.current}
-          {streak.current > 0 && <span> {streak.current > 1 ? 'jours' : 'jour'}</span>}
-        </p>
-        {streak.current === 0 && <p className="snap-none">Aucun streak en cours</p>}
-        <p className="snap-total">{streak.total} journées complètes au total</p>
-        {streak.todayComplete && <p className="snap-done">Journée complète ✅</p>}
+        <div className="snap-streak-row">
+          <div className="snap-stat">
+            <span className="snap-stat-value">{streak.total}</span>
+            <span className="snap-stat-label">
+              {streak.total > 1 ? 'journées complètes' : 'journée complète'}
+            </span>
+          </div>
+          <div className="snap-stat snap-stat-main">
+            <span className="snap-stat-value">🔥 {streak.current}</span>
+            <span className="snap-stat-label">
+              {streak.current === 0
+                ? 'aucun streak'
+                : streak.current > 1
+                  ? 'jours de suite'
+                  : 'jour de suite'}
+            </span>
+          </div>
+          <div className="snap-stat">
+            <span className="snap-stat-value">{me.sent ? '✅' : '⬜'}</span>
+            <span className="snap-stat-label">{me.sent ? 'envoyé' : 'à envoyer'}</span>
+          </div>
+        </div>
         {streak.atRisk && streak.deadline && (
           <p className="snap-risk">
             Il te reste {remaining(streak.deadline)} pour sauver le streak
