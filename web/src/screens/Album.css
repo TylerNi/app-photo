@@ -247,7 +247,7 @@
   display: flex;
   gap: 3px;
   overflow-x: auto;
-  padding: 4px 16px var(--safe-bottom);
+  padding: 4px 16px 0;
   touch-action: pan-x;
   scrollbar-width: none;
 }
