@@ -31,11 +31,6 @@ function remaining(deadline: string): string {
   return hours > 0 ? `${hours} h ${String(minutes).padStart(2, '0')}` : `${minutes} min`;
 }
 
-function frameStyle(media: Media): CSSProperties | undefined {
-  if (media.width === null || media.height === null) return undefined;
-  return { aspectRatio: `${media.width} / ${media.height}` };
-}
-
 export function Snap() {
   const { profile } = useSession();
   const [state, setState] = useState<TodayState | null>(null);
@@ -218,7 +213,6 @@ export function Snap() {
       ) : shown ? (
         <div
           className="snap-frame"
-          style={frameStyle(shown)}
           onClick={(event) => !onVideo(event) && openReveal(other.media)}
         >
           {shown.kind === 'video' ? (
@@ -228,12 +222,12 @@ export function Snap() {
           )}
         </div>
       ) : other.sent && other.teaserUrl ? (
-        <div className="snap-frame snap-frame-short">
+        <div className="snap-frame">
           <img className="snap-teaser" src={other.teaserUrl} alt="" />
           <p className="snap-veil">Envoie ta photo pour voir celle de {other.profile} 👀</p>
         </div>
       ) : (
-        <div className="snap-frame snap-frame-short snap-frame-empty">
+        <div className="snap-frame snap-frame-empty">
           <p>{other.profile} n'a pas encore envoyé sa photo</p>
         </div>
       )}
