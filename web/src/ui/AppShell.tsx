@@ -2,7 +2,6 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '../session';
-import { PushButton } from './PushButton';
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { profile, profiles, logout } = useSession();
@@ -15,7 +14,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="shell-header">
         <span className="shell-title">Album</span>
         <div className="shell-actions">
-          <PushButton />
           <button
             className={`avatar profile-${index}`}
             type="button"
