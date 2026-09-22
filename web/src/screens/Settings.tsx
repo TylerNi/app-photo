@@ -1,25 +1,15 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiError } from '../api/client';
-import { deleteAllMedia, deleteTodaySnaps, resetStreak } from '../api/settings';
+import { resetStreak } from '../api/settings';
 
-type Action = 'snaps' | 'streak' | 'album';
+type Action = 'streak';
 
 const ACTIONS: Record<Action, { label: string; question: string; run: () => Promise<void> }> = {
-  snaps: {
-    label: 'Supprimer les snaps du jour',
-    question: 'Supprimer les snaps du jour des deux profils ?',
-    run: deleteTodaySnaps,
-  },
   streak: {
     label: 'Réinitialiser le streak',
     question: 'Remettre le streak et le total de journées à zéro ? Aucune photo n’est supprimée.',
     run: resetStreak,
-  },
-  album: {
-    label: "Supprimer toutes les photos de l'album",
-    question: 'Supprimer toutes les photos, snaps compris ? Rien ne sera récupérable.',
-    run: deleteAllMedia,
   },
 };
 
