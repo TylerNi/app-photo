@@ -7,6 +7,7 @@ import { localDay } from '../day.js';
 import type { Media } from '../types.js';
 import { makeTeaser, makeThumb } from './derive.js';
 import { perceptualHash, sha256File } from './hash.js';
+import { mirrorFrontCamera } from './mirror.js';
 import { probeImage, probeVideo } from './probe.js';
 
 export interface MediaRow {
@@ -128,6 +129,10 @@ export async function storeUpload(
 
   await mkdir(resolve(config.originalsDir, year, month), { recursive: true });
   await rename(file.path, absoluteStoragePath);
+
+  if (kind === 'photo' && source === 'snap') {
+    await mirrorFrontCamera(absoluteStoragePath, mime);
+  }
 
   const probed =
     kind === 'video'
