@@ -147,7 +147,8 @@
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  transform: translateY(var(--drag, 0px));
+  transform: translateY(var(--drag, 0px)) translate(var(--zx, 0px), var(--zy, 0px))
+    scale(var(--zs, 1));
   transition: transform 0.22s ease;
 }
 

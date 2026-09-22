@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, TouchEvent } from 'react';
 import type { Media } from '../api/types';
+import { usePinch } from '../ui/usePinch';
 
 const SWIPE = 50;
 const SLIDE = 220;
@@ -37,6 +38,7 @@ export function Viewer({
   const settling = useRef(false);
   const strip = useRef<HTMLDivElement>(null);
   const active = useRef<HTMLButtonElement>(null);
+  const pinch = usePinch();
   const media = items[index];
 
   useEffect(() => {
@@ -46,6 +48,7 @@ export function Viewer({
   }, [jump]);
 
   useEffect(() => {
+    pinch.reset();
     const node = active.current;
     const box = strip.current;
     if (!node || !box) return;
@@ -83,13 +86,20 @@ export function Viewer({
       start.current = null;
       return;
     }
+    pinch.onTouchStart(event);
+    setHeld(true);
+    if (event.touches.length > 1 || pinch.zoomed) {
+      start.current = null;
+      setDrag({ x: 0, y: 0 });
+      return;
+    }
     const touch = event.touches[0];
     start.current = { x: touch.clientX, y: touch.clientY };
     axis.current = null;
-    setHeld(true);
   }
 
   function onTouchMove(event: TouchEvent) {
+    pinch.onTouchMove(event);
     const origin = start.current;
     if (!origin) return;
     const touch = event.touches[0];
@@ -108,6 +118,7 @@ export function Viewer({
   }
 
   function onTouchEnd(event: TouchEvent) {
+    pinch.onTouchEnd(event);
     const origin = start.current;
     const direction = axis.current;
     start.current = null;
@@ -151,7 +162,7 @@ export function Viewer({
       <button className="viewer-close" type="button" onClick={onClose}>
         ✕
       </button>
-      <div className="viewer-stage">
+      <div className="viewer-stage" ref={pinch.ref}>
         <div className="viewer-track">
           {window3.map((slot, position) => (
             <div className="viewer-slide" key={slot ? slot.id : `edge-${position}`}>
@@ -171,6 +182,7 @@ export function Viewer({
                 ) : (
                   <img
                     className="viewer-media"
+                    style={position === 1 ? pinch.style : undefined}
                     src={broken.includes(slot.id) ? slot.thumbUrl : slot.originalUrl}
                     alt=""
                     onError={() => setBroken((previous) => [...previous, slot.id])}

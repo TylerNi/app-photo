@@ -7,6 +7,7 @@ import type { Media, TodayState } from '../api/types';
 import { useSession } from '../session';
 import { Button } from '../ui/Button';
 import { Spinner } from '../ui/Spinner';
+import { usePinch } from '../ui/usePinch';
 import './Snap.css';
 
 const SWIPE = 50;
@@ -46,6 +47,7 @@ export function Snap() {
   const cameraInput = useRef<HTMLInputElement>(null);
   const start = useRef<{ x: number; y: number } | null>(null);
   const swiped = useRef(false);
+  const pinch = usePinch();
 
   const load = useCallback(async () => {
     try {
@@ -101,12 +103,19 @@ export function Snap() {
       start.current = null;
       return;
     }
+    pinch.onTouchStart(event);
+    setHeld(true);
+    if (event.touches.length > 1 || pinch.zoomed) {
+      start.current = null;
+      setDrag(0);
+      return;
+    }
     const touch = event.touches[0];
     start.current = { x: touch.clientX, y: touch.clientY };
-    setHeld(true);
   }
 
   function onTouchMove(event: TouchEvent) {
+    pinch.onTouchMove(event);
     const origin = start.current;
     if (!origin) return;
     const touch = event.touches[0];
@@ -116,6 +125,7 @@ export function Snap() {
   }
 
   function onTouchEnd(event: TouchEvent) {
+    pinch.onTouchEnd(event);
     const origin = start.current;
     start.current = null;
     setHeld(false);
@@ -138,9 +148,14 @@ export function Snap() {
       swiped.current = false;
       return;
     }
+    if (pinch.used.current) {
+      pinch.used.current = false;
+      return;
+    }
     if (!reveal || closing || onVideo(event)) return;
     const next = reveal.index + 1;
     if (next < reveal.items.length) {
+      pinch.reset();
       setReveal({ items: reveal.items, index: next });
       return;
     }
@@ -149,6 +164,7 @@ export function Snap() {
 
   function close() {
     if (!reveal) return;
+    pinch.reset();
     const merged = [...new Set([...seen, ...reveal.items.map((media) => media.id)])];
     localStorage.setItem(seenKey(profile!), merged.join(','));
     setSeen(merged);
@@ -267,6 +283,7 @@ export function Snap() {
 
       {reveal && current && (
         <div
+          ref={pinch.ref}
           className={`snap-reveal${held ? ' snap-reveal-held' : ''}${closing ? ' snap-reveal-closing' : ''}`}
           style={{ '--drag': `${drag}px` } as CSSProperties}
           onClick={advance}
@@ -286,7 +303,12 @@ export function Snap() {
               autoPlay
             />
           ) : (
-            <img className="snap-reveal-media" src={current.originalUrl} alt="" />
+            <img
+              className="snap-reveal-media"
+              style={pinch.style}
+              src={current.originalUrl}
+              alt=""
+            />
           )}
           {reveal.items.length > 1 && (
             <p className="snap-reveal-count">
