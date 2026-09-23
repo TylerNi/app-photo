@@ -45,7 +45,7 @@ app.use((_err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 
 app.listen(config.port, '0.0.0.0', () => {
   console.log(`app-photo écoute sur le port ${config.port}`);
-  reprobeTakenAt()
-    .then(backfillHashes)
+  backfillHashes()
+    .then(reprobeTakenAt)
     .catch(() => {});
 });

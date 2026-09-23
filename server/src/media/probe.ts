@@ -44,11 +44,11 @@ export async function probeImage(
 
   try {
     const { stdout } = await run(
-      'magick',
-      ['identify', '-format', '%[EXIF:DateTimeOriginal]', `${path}[0]`],
+      'exiftool',
+      ['-s3', '-d', '%Y:%m:%d %H:%M:%S', '-DateTimeOriginal', '-CreateDate', path],
       { timeout: TIMEOUT },
     );
-    takenAt = fromExifDate(stdout);
+    takenAt = stdout.split('\n').map(fromExifDate).find((value) => value !== null) ?? null;
   } catch {
     takenAt = null;
   }

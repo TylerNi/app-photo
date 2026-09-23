@@ -4,7 +4,7 @@ import { db } from '../db.js';
 import { perceptualHash, sha256File } from './hash.js';
 import { probeImage, probeVideo } from './probe.js';
 
-const VERSION = 1;
+const VERSION = 3;
 const HASH_VERSION = 2;
 
 export async function backfillHashes(): Promise<void> {
